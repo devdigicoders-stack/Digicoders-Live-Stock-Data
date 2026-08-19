@@ -11,7 +11,8 @@ app.use(express.static(__dirname + "/public"));
 async function fetchTicker() {
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH ||
+      "/opt/render/.cache/puppeteer/chrome/linux-152.0.7977.42/chrome-linux64/chrome",
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
