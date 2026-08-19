@@ -20,7 +20,7 @@
     .ticker-text {
       display: inline-block;
       animation: scroll linear infinite;
-      font-size: 5vw;
+      font-size: 10px;
       font-weight: 900;
     }
     .item { display: inline-block; margin-right: 6vw; }
@@ -65,8 +65,8 @@
         </span>`;
       }).join("");
 
-      // Set scroll speed based on content width
-      const duration = Math.max(stocks.length * 5, 20);
+      // 75% slower: multiply duration by 4x
+      const duration = Math.max(stocks.length * 20, 80);
       ticker.style.animationDuration = duration + "s";
     }
 
