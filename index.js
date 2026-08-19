@@ -11,7 +11,14 @@ app.use(express.static(__dirname + "/public"));
 async function fetchTicker() {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--single-process",
+    ],
   });
   const page = await browser.newPage();
 
