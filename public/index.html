@@ -6,8 +6,8 @@
   <title>Stock LED Ticker - 2016x16</title>
   <style>
     :root {
-      --font-size: 7px;
-      --y-offset: 0px; /* Perfectly centered at 0px */
+      --font-size: 8px;
+      --y-offset: 3px; /* Shifted DOWN by 3px for perfect vertical centering */
       --gap: 20px;
     }
 
@@ -70,14 +70,14 @@
       animation: scroll linear infinite;
       will-change: transform;
       position: relative;
-      top: var(--y-offset, 0px);
+      top: var(--y-offset, 3px);
     }
 
     .ticker-text {
       display: inline-flex;
       align-items: center;
       font-family: Arial Black, "Arial Black", Impact, sans-serif;
-      font-size: 7px; /* Fixed strictly to 7px */
+      font-size: 8px;
       font-weight: 900;
       line-height: 1;
     }
@@ -120,7 +120,7 @@
       display: inline-block;
       margin-right: 2px;
       line-height: 1;
-      font-size: 7px;
+      font-size: 8px;
     }
 
     /* Live notification for keyboard adjustments */
@@ -132,7 +132,7 @@
       border: 1px solid #444;
       color: #00ffea;
       font-family: monospace;
-      font-size: 7px;
+      font-size: 8px;
       padding: 1px 4px;
       z-index: 999;
       display: none;
@@ -156,7 +156,7 @@
   <script>
     function getStoredConfig() {
       try {
-        const raw = localStorage.getItem("ticker_config_v2");
+        const raw = localStorage.getItem("ticker_config_v4");
         return raw ? JSON.parse(raw) : {};
       } catch (e) {
         return {};
@@ -177,8 +177,8 @@
     }
 
     const config = {
-      yOffset: getNum(urlParams.get("y"), saved.yOffset, 0), // Default 0px centered
-      fontSize: 7, // Fixed 7px
+      yOffset: getNum(urlParams.get("y"), saved.yOffset, 3), // Default +3px down
+      fontSize: 8,
       gap: getNum(urlParams.get("gap"), saved.gap, 20),
       speed: getNum(urlParams.get("speed"), saved.speed, 40),
       guide: urlParams.get("guide") === "1"
@@ -186,6 +186,7 @@
 
     function applyConfig() {
       document.documentElement.style.setProperty("--y-offset", config.yOffset + "px");
+      document.documentElement.style.setProperty("--font-size", config.fontSize + "px");
       document.documentElement.style.setProperty("--gap", config.gap + "px");
 
       const viewport = document.getElementById("viewport");
@@ -203,7 +204,7 @@
       }
 
       try {
-        localStorage.setItem("ticker_config_v2", JSON.stringify(config));
+        localStorage.setItem("ticker_config_v4", JSON.stringify(config));
       } catch (e) {}
     }
 
@@ -211,7 +212,7 @@
     function showToast(msg) {
       const toast = document.getElementById("info-toast");
       if (!toast) return;
-      toast.textContent = msg || `Y: ${config.yOffset}px | Size: 7px | Speed: ${config.speed}s`;
+      toast.textContent = msg || `Y: ${config.yOffset}px | Size: 8px | Speed: ${config.speed}s`;
       toast.style.display = "block";
       clearTimeout(toastTimeout);
       toastTimeout = setTimeout(function() {
@@ -238,7 +239,7 @@
         config.guide = !config.guide; // Toggle guide
         changed = true;
       } else if (e.key.toLowerCase() === "r") {
-        config.yOffset = 0;
+        config.yOffset = 3;
         config.gap = 20;
         config.speed = 40;
         changed = true;
