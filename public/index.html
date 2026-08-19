@@ -6,8 +6,8 @@
   <title>Stock LED Ticker - 2016x16</title>
   <style>
     :root {
-      --font-size: 8px;
-      --y-offset: 3px; /* Shifted DOWN by 3px for perfect vertical centering */
+      --font-size: 10px;
+      --y-offset: 2px; /* Shifted DOWN by 2px for perfect vertical centering of 10px font */
       --gap: 20px;
     }
 
@@ -70,14 +70,14 @@
       animation: scroll linear infinite;
       will-change: transform;
       position: relative;
-      top: var(--y-offset, 3px);
+      top: var(--y-offset, 2px);
     }
 
     .ticker-text {
       display: inline-flex;
       align-items: center;
       font-family: Arial Black, "Arial Black", Impact, sans-serif;
-      font-size: 8px;
+      font-size: 10px; /* Fixed to 10px */
       font-weight: 900;
       line-height: 1;
     }
@@ -120,7 +120,7 @@
       display: inline-block;
       margin-right: 2px;
       line-height: 1;
-      font-size: 8px;
+      font-size: 10px;
     }
 
     /* Live notification for keyboard adjustments */
@@ -156,7 +156,7 @@
   <script>
     function getStoredConfig() {
       try {
-        const raw = localStorage.getItem("ticker_config_v4");
+        const raw = localStorage.getItem("ticker_config_v5");
         return raw ? JSON.parse(raw) : {};
       } catch (e) {
         return {};
@@ -177,8 +177,8 @@
     }
 
     const config = {
-      yOffset: getNum(urlParams.get("y"), saved.yOffset, 3), // Default +3px down
-      fontSize: 8,
+      yOffset: getNum(urlParams.get("y"), saved.yOffset, 2), // Default +2px down for 10px font
+      fontSize: 10, // Fixed 10px
       gap: getNum(urlParams.get("gap"), saved.gap, 20),
       speed: getNum(urlParams.get("speed"), saved.speed, 40),
       guide: urlParams.get("guide") === "1"
@@ -204,7 +204,7 @@
       }
 
       try {
-        localStorage.setItem("ticker_config_v4", JSON.stringify(config));
+        localStorage.setItem("ticker_config_v5", JSON.stringify(config));
       } catch (e) {}
     }
 
@@ -212,7 +212,7 @@
     function showToast(msg) {
       const toast = document.getElementById("info-toast");
       if (!toast) return;
-      toast.textContent = msg || `Y: ${config.yOffset}px | Size: 8px | Speed: ${config.speed}s`;
+      toast.textContent = msg || `Y: ${config.yOffset}px | Size: 10px | Speed: ${config.speed}s`;
       toast.style.display = "block";
       clearTimeout(toastTimeout);
       toastTimeout = setTimeout(function() {
@@ -239,7 +239,7 @@
         config.guide = !config.guide; // Toggle guide
         changed = true;
       } else if (e.key.toLowerCase() === "r") {
-        config.yOffset = 3;
+        config.yOffset = 2;
         config.gap = 20;
         config.speed = 40;
         changed = true;
