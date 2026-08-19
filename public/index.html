@@ -1,33 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NSE Stock LED Ticker - 2016x16</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #000;
+    :root {
+      --font-size: 7px;
+      --y-offset: -2px; /* Moves text UP to fix bottom cut and top gap */
+      --gap: 20px;
+      --font-family: "Arial Black", Arial, Impact, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #000000;
+      color: #FFFFFF;
+      overflow: hidden;
       display: flex;
       align-items: center;
-      height: 100vh;
-      overflow: hidden;
-      font-family: Arial Black, sans-serif;
+      justify-content: flex-start;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: geometricPrecision;
     }
-    .ticker-wrap {
+
+    .ticker-viewport {
       width: 100%;
+      height: 100vh;
+      max-height: 16px;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      position: relative;
+      background: #000;
+    }
+
+    /* Calibration guide lines (active when ?guide=1 or 'G' key pressed) */
+    .ticker-viewport.guide-mode {
+      outline: 1px dashed #333333;
+    }
+    .ticker-viewport.guide-mode::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #ff0055;
+      z-index: 100;
+    }
+    .ticker-viewport.guide-mode::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #00e5ff;
+      z-index: 100;
+    }
+
+    .ticker-track {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      animation: scroll linear infinite;
+      will-change: transform;
+    }
+
+    .ticker-content {
+      display: inline-flex;
+      align-items: center;
+      line-height: 1;
+      font-family: var(--font-family);
+      font-size: var(--font-size);
+      font-weight: 900;
+      transform: translateY(var(--y-offset));
+      vertical-align: middle;
+    }
+
+    .item {
+      display: inline-flex;
+      align-items: center;
+      margin-right: var(--gap);
+      line-height: 1;
       white-space: nowrap;
     }
-    .ticker-text {
-      display: inline-block;
-      animation: scroll linear infinite;
-      font-size: 7px;
+
+    .symbol {
+      color: #FFD700; /* Bright LED Yellow / Gold */
+      margin-right: 4px;
       font-weight: 900;
     }
-    .item { display: inline-block; margin-right: 20px; }
-    .symbol  { color: #FFD700; }
-    .value   { color: #FFFFFF; margin: 0 4px; }
-    .up      { color: #00FF00; }
-    .down    { color: #FF3333; }
+
+    .value {
+      color: #FFFFFF; /* Bright LED White */
+      margin-right: 4px;
+      font-weight: 900;
+    }
+
+    .change-group {
+      display: inline-flex;
+      align-items: center;
+      font-weight: 900;
+    }
+
+    .up {
+      color: #00FF00; /* Bright LED Green */
+    }
+
+    .down {
+      color: #FF2222; /* Bright LED Red */
+    }
+
+    .arrow {
+      display: inline-block;
+      font-size: 0.85em;
+      margin-right: 2px;
+      line-height: 1;
+      transform: translateY(-0.5px);
+    }
+
+    /* Live Calibration Overlay */
+    #overlay {
+      position: fixed;
+      top: 1px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid #444;
+      color: #00e5ff;
+      font-family: monospace;
+      font-size: 8px;
+      padding: 1px 4px;
+      border-radius: 2px;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    #overlay.visible {
+      opacity: 1;
+    }
+
     @keyframes scroll {
       0%   { transform: translateX(100vw); }
       100% { transform: translateX(-100%); }
@@ -35,41 +157,134 @@
   </style>
 </head>
 <body>
-  <div class="ticker-wrap">
-    <div class="ticker-text" id="ticker">Loading...</div>
+  <div class="ticker-viewport" id="viewport">
+    <div class="ticker-track" id="ticker-track">
+      <div class="ticker-content" id="ticker">Loading...</div>
+    </div>
   </div>
 
+  <div id="overlay"></div>
+
   <script>
+    // Configuration with LocalStorage + URL Params support
+    const urlParams = new URLSearchParams(window.location.search);
+    const savedConfig = JSON.parse(localStorage.getItem("ticker_config") || "{}");
+
+    const config = {
+      yOffset: parseFloat(urlParams.get("y") || savedConfig.yOffset ?? -2),
+      fontSize: parseFloat(urlParams.get("size") || savedConfig.fontSize ?? 7),
+      gap: parseFloat(urlParams.get("gap") || savedConfig.gap ?? 20),
+      speed: parseFloat(urlParams.get("speed") || savedConfig.speed ?? 40),
+      font: urlParams.get("font") || savedConfig.font || "'Arial Black', Arial, Impact, sans-serif",
+      guide: urlParams.get("guide") === "1"
+    };
+
+    function applyConfig() {
+      document.documentElement.style.setProperty("--y-offset", config.yOffset + "px");
+      document.documentElement.style.setProperty("--font-size", config.fontSize + "px");
+      document.documentElement.style.setProperty("--gap", config.gap + "px");
+      document.documentElement.style.setProperty("--font-family", config.font);
+
+      const viewport = document.getElementById("viewport");
+      if (config.guide) {
+        viewport.classList.add("guide-mode");
+      } else {
+        viewport.classList.remove("guide-mode");
+      }
+
+      const tickerTrack = document.getElementById("ticker-track");
+      if (tickerTrack) {
+        tickerTrack.style.animationDuration = config.speed + "s";
+      }
+
+      localStorage.setItem("ticker_config", JSON.stringify(config));
+    }
+
+    let overlayTimer = null;
+    function showOverlay(msg) {
+      const overlay = document.getElementById("overlay");
+      overlay.textContent = msg || `Y: ${config.yOffset}px | Size: ${config.fontSize}px | Speed: ${config.speed}s (Saved)`;
+      overlay.classList.add("visible");
+      clearTimeout(overlayTimer);
+      overlayTimer = setTimeout(() => overlay.classList.remove("visible"), 2500);
+    }
+
+    // Keyboard Shortcuts for Live Pixel Tuning on Screen
+    window.addEventListener("keydown", (e) => {
+      let changed = false;
+      if (e.key === "ArrowUp") {
+        config.yOffset -= 1; // Move text UP
+        changed = true;
+      } else if (e.key === "ArrowDown") {
+        config.yOffset += 1; // Move text DOWN
+        changed = true;
+      } else if (e.key === "+" || e.key === "=") {
+        config.fontSize += 0.5; // Increase font size
+        changed = true;
+      } else if (e.key === "-" || e.key === "_") {
+        config.fontSize = Math.max(4, config.fontSize - 0.5); // Decrease font size
+        changed = true;
+      } else if (e.key === "]" || e.key === "}") {
+        config.speed += 5; // Slower scroll
+        changed = true;
+      } else if (e.key === "[" || e.key === "{") {
+        config.speed = Math.max(5, config.speed - 5); // Faster scroll
+        changed = true;
+      } else if (e.key.toLowerCase() === "g") {
+        config.guide = !config.guide; // Toggle guide lines
+        changed = true;
+      } else if (e.key.toLowerCase() === "r") {
+        // Reset
+        config.yOffset = -2;
+        config.fontSize = 7;
+        config.gap = 20;
+        config.speed = 40;
+        changed = true;
+      }
+
+      if (changed) {
+        applyConfig();
+        showOverlay();
+      }
+    });
+
     let stocks = [];
 
     async function loadData() {
       try {
-        const res  = await fetch("/api/ticker");
+        const res = await fetch("/api/ticker");
         const json = await res.json();
-        if (json.status && json.data.length > 0) {
+        if (json.status && json.data && json.data.length > 0) {
           stocks = json.data;
           render();
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Fetch error:", e);
+      }
     }
 
     function render() {
       const ticker = document.getElementById("ticker");
       ticker.innerHTML = stocks.map(s => {
-        const cls = s.direction === "UP" ? "up" : "down";
-        const arrow = s.direction === "UP" ? "▲" : "▼";
+        const isUp = s.direction === "UP";
+        const cls = isUp ? "up" : "down";
+        const arrow = isUp ? "▲" : "▼";
         return `<span class="item">
           <span class="symbol">${s.symbol}</span>
           <span class="value">${s.value}</span>
-          <span class="${cls}">${arrow} ${s.change} (${s.percent})</span>
+          <span class="change-group ${cls}">
+            <span class="arrow">${arrow}</span>
+            <span>${s.change} (${s.percent})</span>
+          </span>
         </span>`;
       }).join("");
 
-      // 50% of original speed
-      const duration = Math.max(stocks.length * 10, 40);
-      ticker.style.animationDuration = duration + "s";
+      const calculatedDuration = Math.max(stocks.length * 10, config.speed);
+      const tickerTrack = document.getElementById("ticker-track");
+      tickerTrack.style.animationDuration = calculatedDuration + "s";
     }
 
+    applyConfig();
     loadData();
     setInterval(loadData, 60000);
   </script>
