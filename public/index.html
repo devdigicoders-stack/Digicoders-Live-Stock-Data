@@ -23,9 +23,9 @@
       font-size: 10px;
       font-weight: 900;
     }
-    .item { display: inline-block; margin-right: 6vw; }
+    .item { display: inline-block; margin-right: 20px; }
     .symbol  { color: #FFD700; }
-    .value   { color: #FFFFFF; margin: 0 1vw; }
+    .value   { color: #FFFFFF; margin: 0 4px; }
     .up      { color: #00FF00; }
     .down    { color: #FF3333; }
     @keyframes scroll {
@@ -65,8 +65,8 @@
         </span>`;
       }).join("");
 
-      // 75% slower: multiply duration by 4x
-      const duration = Math.max(stocks.length * 20, 80);
+      // 40% of original speed
+      const duration = Math.max(stocks.length * 12, 48);
       ticker.style.animationDuration = duration + "s";
     }
 
