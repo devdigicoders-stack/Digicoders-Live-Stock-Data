@@ -1,5 +1,5 @@
 const express = require("express");
-const puppeteer = require("puppeteer");
+const axios = require("axios");
 
 const app = express();
 app.use((req, res, next) => {
@@ -8,41 +8,30 @@ app.use((req, res, next) => {
 });
 app.use(express.static(__dirname + "/public"));
 
-async function fetchTicker() {
-  const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH ||
-      "/opt/render/.cache/puppeteer/chrome/linux-152.0.7977.42/chrome-linux64/chrome",
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--single-process",
-    ],
-  });
-  const page = await browser.newPage();
+const client = axios.create({
+  baseURL: "https://www.nseindia.com",
+  timeout: 15000,
+  headers: {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Referer": "https://www.nseindia.com/",
+    "Connection": "keep-alive",
+  },
+});
 
-  await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36");
-  await page.goto("https://www.nseindia.com", { waitUntil: "networkidle2" });
+let cookieJar = "";
 
-  const cookies = await page.cookies();
-  const cookieStr = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+async function refreshCookies() {
+  const res = await client.get("/", { responseType: "text" });
+  const setCookie = res.headers["set-cookie"];
+  if (setCookie) cookieJar = setCookie.map((c) => c.split(";")[0]).join("; ");
+}
 
-  const indexData = await page.evaluate(async (cookieStr) => {
-    const res = await fetch("https://www.nseindia.com/api/allIndices", {
-      headers: { Cookie: cookieStr, Referer: "https://www.nseindia.com" },
-    });
-    return res.json();
-  }, cookieStr);
-
-  await browser.close();
-
-  const wanted = [
-  // Broad Market
+const wanted = [
   "NIFTY 50", "NIFTY NEXT 50", "NIFTY 100", "NIFTY 200", "NIFTY 500",
   "NIFTY MIDCAP 50", "NIFTY MIDCAP 100", "NIFTY SMALLCAP 100", "INDIA VIX",
-  // Sectoral
   "NIFTY BANK", "NIFTY IT", "NIFTY AUTO", "NIFTY FMCG", "NIFTY PHARMA",
   "NIFTY METAL", "NIFTY REALTY", "NIFTY ENERGY", "NIFTY MEDIA",
   "NIFTY PSU BANK", "NIFTY PRIVATE BANK", "NIFTY FINANCIAL SERVICES",
@@ -51,38 +40,40 @@ async function fetchTicker() {
   "NIFTY CPSE", "NIFTY PSE", "NIFTY MNC", "NIFTY INDIA DEFENCE",
   "NIFTY EV & NEW AGE AUTOMOTIVE", "NIFTY CAPITAL MARKETS",
 ];
-  const result = [];
 
-  for (const idx of indexData.data) {
-    if (wanted.includes(idx.index)) {
+async function fetchTicker() {
+  const { data } = await client.get("/api/allIndices", {
+    headers: { Cookie: cookieJar },
+  });
+
+  return data.data
+    .filter((idx) => wanted.includes(idx.index))
+    .map((idx) => {
       const change = parseFloat(idx.variation || idx.change || 0).toFixed(2);
       const percent = parseFloat(idx.percentChange || 0).toFixed(2);
-      result.push({
+      return {
         symbol: idx.index,
         value: parseFloat(idx.last).toFixed(2),
         change: change >= 0 ? `+${change}` : `${change}`,
         percent: percent >= 0 ? `+${percent}%` : `${percent}%`,
         direction: change >= 0 ? "UP" : "DOWN",
-      });
-    }
-  }
-
-  return result;
+      };
+    });
 }
 
 let cache = { data: [], updatedAt: null };
 
 async function refreshCache() {
   try {
+    await refreshCookies();
     cache.data = await fetchTicker();
     cache.updatedAt = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-    console.log("Cache refreshed at", cache.updatedAt);
+    console.log("Cache refreshed at", cache.updatedAt, "| Count:", cache.data.length);
   } catch (e) {
     console.error("Cache refresh failed:", e.message);
   }
 }
 
-// Refresh every 60 seconds
 refreshCache();
 setInterval(refreshCache, 60000);
 
