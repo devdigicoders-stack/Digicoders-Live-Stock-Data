@@ -7,7 +7,7 @@
   <style>
     :root {
       --font-size: 7px;
-      --y-offset: -2px; /* Shifts text UP to fix bottom cutoff and top gap */
+      --y-offset: 0px; /* Perfectly centered at 0px */
       --gap: 20px;
     }
 
@@ -33,6 +33,7 @@
     .ticker-viewport {
       width: 100%;
       height: 100vh;
+      max-height: 16px;
       overflow: hidden;
       display: flex;
       align-items: center;
@@ -69,14 +70,14 @@
       animation: scroll linear infinite;
       will-change: transform;
       position: relative;
-      top: var(--y-offset, -2px);
+      top: var(--y-offset, 0px);
     }
 
     .ticker-text {
       display: inline-flex;
       align-items: center;
       font-family: Arial Black, "Arial Black", Impact, sans-serif;
-      font-size: var(--font-size, 7px);
+      font-size: 7px; /* Fixed strictly to 7px */
       font-weight: 900;
       line-height: 1;
     }
@@ -119,7 +120,7 @@
       display: inline-block;
       margin-right: 2px;
       line-height: 1;
-      font-size: 0.85em;
+      font-size: 7px;
     }
 
     /* Live notification for keyboard adjustments */
@@ -155,7 +156,7 @@
   <script>
     function getStoredConfig() {
       try {
-        const raw = localStorage.getItem("ticker_config");
+        const raw = localStorage.getItem("ticker_config_v2");
         return raw ? JSON.parse(raw) : {};
       } catch (e) {
         return {};
@@ -176,8 +177,8 @@
     }
 
     const config = {
-      yOffset: getNum(urlParams.get("y"), saved.yOffset, -2),
-      fontSize: getNum(urlParams.get("size"), saved.fontSize, 7),
+      yOffset: getNum(urlParams.get("y"), saved.yOffset, 0), // Default 0px centered
+      fontSize: 7, // Fixed 7px
       gap: getNum(urlParams.get("gap"), saved.gap, 20),
       speed: getNum(urlParams.get("speed"), saved.speed, 40),
       guide: urlParams.get("guide") === "1"
@@ -185,7 +186,6 @@
 
     function applyConfig() {
       document.documentElement.style.setProperty("--y-offset", config.yOffset + "px");
-      document.documentElement.style.setProperty("--font-size", config.fontSize + "px");
       document.documentElement.style.setProperty("--gap", config.gap + "px");
 
       const viewport = document.getElementById("viewport");
@@ -203,7 +203,7 @@
       }
 
       try {
-        localStorage.setItem("ticker_config", JSON.stringify(config));
+        localStorage.setItem("ticker_config_v2", JSON.stringify(config));
       } catch (e) {}
     }
 
@@ -211,7 +211,7 @@
     function showToast(msg) {
       const toast = document.getElementById("info-toast");
       if (!toast) return;
-      toast.textContent = msg || `Y: ${config.yOffset}px | Size: ${config.fontSize}px | Speed: ${config.speed}s`;
+      toast.textContent = msg || `Y: ${config.yOffset}px | Size: 7px | Speed: ${config.speed}s`;
       toast.style.display = "block";
       clearTimeout(toastTimeout);
       toastTimeout = setTimeout(function() {
@@ -228,12 +228,6 @@
       } else if (e.key === "ArrowDown") {
         config.yOffset += 1; // Move text DOWN
         changed = true;
-      } else if (e.key === "+" || e.key === "=") {
-        config.fontSize += 0.5; // Increase font size
-        changed = true;
-      } else if (e.key === "-" || e.key === "_") {
-        config.fontSize = Math.max(4, config.fontSize - 0.5); // Decrease font size
-        changed = true;
       } else if (e.key === "]" || e.key === "}") {
         config.speed += 5; // Slower scroll
         changed = true;
@@ -244,8 +238,7 @@
         config.guide = !config.guide; // Toggle guide
         changed = true;
       } else if (e.key.toLowerCase() === "r") {
-        config.yOffset = -2;
-        config.fontSize = 7;
+        config.yOffset = 0;
         config.gap = 20;
         config.speed = 40;
         changed = true;
@@ -257,7 +250,7 @@
       }
     });
 
-    // Default immediate data so display never shows empty/loading
+    // Default immediate stock data
     let stocks = [
       { symbol: "NIFTY 50", value: "24078.30", change: "-76.60", percent: "-0.32%", direction: "DOWN" },
       { symbol: "NIFTY BANK", value: "51245.80", change: "+142.50", percent: "+0.28%", direction: "UP" },
