@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NSE Stock LED Ticker - 2016x16</title>
+  <title>Stock LED Ticker - 2016x16</title>
   <style>
     :root {
       --font-size: 7px;
-      --y-offset: -2px; /* Moves text UP to fix bottom cut and top gap */
+      --y-offset: -2px; /* Shifts text UP to fix bottom cutoff and top gap */
       --gap: 20px;
-      --font-family: "Arial Black", Arial, Impact, sans-serif;
     }
 
     * {
@@ -29,24 +28,19 @@
       justify-content: flex-start;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      text-rendering: geometricPrecision;
     }
 
     .ticker-viewport {
       width: 100%;
       height: 100vh;
-      max-height: 16px;
       overflow: hidden;
       display: flex;
       align-items: center;
       position: relative;
-      background: #000;
+      background: #000000;
     }
 
-    /* Calibration guide lines (active when ?guide=1 or 'G' key pressed) */
-    .ticker-viewport.guide-mode {
-      outline: 1px dashed #333333;
-    }
+    /* Boundary lines for 16px calibration (when ?guide=1 or 'G' key pressed) */
     .ticker-viewport.guide-mode::before {
       content: "";
       position: absolute;
@@ -74,80 +68,73 @@
       white-space: nowrap;
       animation: scroll linear infinite;
       will-change: transform;
+      position: relative;
+      top: var(--y-offset, -2px);
     }
 
-    .ticker-content {
+    .ticker-text {
       display: inline-flex;
       align-items: center;
-      line-height: 1;
-      font-family: var(--font-family);
-      font-size: var(--font-size);
+      font-family: Arial Black, "Arial Black", Impact, sans-serif;
+      font-size: var(--font-size, 7px);
       font-weight: 900;
-      transform: translateY(var(--y-offset));
-      vertical-align: middle;
+      line-height: 1;
     }
 
     .item {
       display: inline-flex;
       align-items: center;
-      margin-right: var(--gap);
+      margin-right: var(--gap, 20px);
       line-height: 1;
       white-space: nowrap;
     }
 
     .symbol {
-      color: #FFD700; /* Bright LED Yellow / Gold */
+      color: #FFD700;
       margin-right: 4px;
       font-weight: 900;
     }
 
     .value {
-      color: #FFFFFF; /* Bright LED White */
+      color: #FFFFFF;
       margin-right: 4px;
       font-weight: 900;
     }
 
-    .change-group {
+    .up {
+      color: #00FF00;
       display: inline-flex;
       align-items: center;
       font-weight: 900;
     }
 
-    .up {
-      color: #00FF00; /* Bright LED Green */
-    }
-
     .down {
-      color: #FF2222; /* Bright LED Red */
+      color: #FF3333;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 900;
     }
 
     .arrow {
       display: inline-block;
-      font-size: 0.85em;
       margin-right: 2px;
       line-height: 1;
-      transform: translateY(-0.5px);
+      font-size: 0.85em;
     }
 
-    /* Live Calibration Overlay */
-    #overlay {
+    /* Live notification for keyboard adjustments */
+    #info-toast {
       position: fixed;
       top: 1px;
       right: 4px;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       border: 1px solid #444;
-      color: #00e5ff;
+      color: #00ffea;
       font-family: monospace;
-      font-size: 8px;
+      font-size: 7px;
       padding: 1px 4px;
-      border-radius: 2px;
       z-index: 999;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-    }
-    #overlay.visible {
-      opacity: 1;
+      display: none;
     }
 
     @keyframes scroll {
@@ -159,23 +146,40 @@
 <body>
   <div class="ticker-viewport" id="viewport">
     <div class="ticker-track" id="ticker-track">
-      <div class="ticker-content" id="ticker">Loading...</div>
+      <div class="ticker-text" id="ticker"></div>
     </div>
   </div>
 
-  <div id="overlay"></div>
+  <div id="info-toast"></div>
 
   <script>
-    // Configuration with LocalStorage + URL Params support
+    function getStoredConfig() {
+      try {
+        const raw = localStorage.getItem("ticker_config");
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
-    const savedConfig = JSON.parse(localStorage.getItem("ticker_config") || "{}");
+    const saved = getStoredConfig();
+
+    function getNum(paramVal, savedVal, defaultVal) {
+      if (paramVal !== null && paramVal !== undefined && paramVal !== "" && !isNaN(Number(paramVal))) {
+        return Number(paramVal);
+      }
+      if (savedVal !== null && savedVal !== undefined && savedVal !== "" && !isNaN(Number(savedVal))) {
+        return Number(savedVal);
+      }
+      return defaultVal;
+    }
 
     const config = {
-      yOffset: parseFloat(urlParams.get("y") || savedConfig.yOffset ?? -2),
-      fontSize: parseFloat(urlParams.get("size") || savedConfig.fontSize ?? 7),
-      gap: parseFloat(urlParams.get("gap") || savedConfig.gap ?? 20),
-      speed: parseFloat(urlParams.get("speed") || savedConfig.speed ?? 40),
-      font: urlParams.get("font") || savedConfig.font || "'Arial Black', Arial, Impact, sans-serif",
+      yOffset: getNum(urlParams.get("y"), saved.yOffset, -2),
+      fontSize: getNum(urlParams.get("size"), saved.fontSize, 7),
+      gap: getNum(urlParams.get("gap"), saved.gap, 20),
+      speed: getNum(urlParams.get("speed"), saved.speed, 40),
       guide: urlParams.get("guide") === "1"
     };
 
@@ -183,13 +187,14 @@
       document.documentElement.style.setProperty("--y-offset", config.yOffset + "px");
       document.documentElement.style.setProperty("--font-size", config.fontSize + "px");
       document.documentElement.style.setProperty("--gap", config.gap + "px");
-      document.documentElement.style.setProperty("--font-family", config.font);
 
       const viewport = document.getElementById("viewport");
-      if (config.guide) {
-        viewport.classList.add("guide-mode");
-      } else {
-        viewport.classList.remove("guide-mode");
+      if (viewport) {
+        if (config.guide) {
+          viewport.classList.add("guide-mode");
+        } else {
+          viewport.classList.remove("guide-mode");
+        }
       }
 
       const tickerTrack = document.getElementById("ticker-track");
@@ -197,20 +202,25 @@
         tickerTrack.style.animationDuration = config.speed + "s";
       }
 
-      localStorage.setItem("ticker_config", JSON.stringify(config));
+      try {
+        localStorage.setItem("ticker_config", JSON.stringify(config));
+      } catch (e) {}
     }
 
-    let overlayTimer = null;
-    function showOverlay(msg) {
-      const overlay = document.getElementById("overlay");
-      overlay.textContent = msg || `Y: ${config.yOffset}px | Size: ${config.fontSize}px | Speed: ${config.speed}s (Saved)`;
-      overlay.classList.add("visible");
-      clearTimeout(overlayTimer);
-      overlayTimer = setTimeout(() => overlay.classList.remove("visible"), 2500);
+    let toastTimeout = null;
+    function showToast(msg) {
+      const toast = document.getElementById("info-toast");
+      if (!toast) return;
+      toast.textContent = msg || `Y: ${config.yOffset}px | Size: ${config.fontSize}px | Speed: ${config.speed}s`;
+      toast.style.display = "block";
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(function() {
+        toast.style.display = "none";
+      }, 2500);
     }
 
-    // Keyboard Shortcuts for Live Pixel Tuning on Screen
-    window.addEventListener("keydown", (e) => {
+    // Keyboard Shortcuts for Live Adjustment
+    window.addEventListener("keydown", function(e) {
       let changed = false;
       if (e.key === "ArrowUp") {
         config.yOffset -= 1; // Move text UP
@@ -231,10 +241,9 @@
         config.speed = Math.max(5, config.speed - 5); // Faster scroll
         changed = true;
       } else if (e.key.toLowerCase() === "g") {
-        config.guide = !config.guide; // Toggle guide lines
+        config.guide = !config.guide; // Toggle guide
         changed = true;
       } else if (e.key.toLowerCase() === "r") {
-        // Reset
         config.yOffset = -2;
         config.fontSize = 7;
         config.gap = 20;
@@ -244,11 +253,45 @@
 
       if (changed) {
         applyConfig();
-        showOverlay();
+        showToast();
       }
     });
 
-    let stocks = [];
+    // Default immediate data so display never shows empty/loading
+    let stocks = [
+      { symbol: "NIFTY 50", value: "24078.30", change: "-76.60", percent: "-0.32%", direction: "DOWN" },
+      { symbol: "NIFTY BANK", value: "51245.80", change: "+142.50", percent: "+0.28%", direction: "UP" },
+      { symbol: "NIFTY IT", value: "38920.15", change: "+310.40", percent: "+0.80%", direction: "UP" },
+      { symbol: "NIFTY AUTO", value: "22450.60", change: "-115.20", percent: "-0.51%", direction: "DOWN" },
+      { symbol: "NIFTY PHARMA", value: "21680.45", change: "+85.30", percent: "+0.39%", direction: "UP" },
+      { symbol: "NIFTY METAL", value: "9340.10", change: "-42.70", percent: "-0.45%", direction: "DOWN" },
+      { symbol: "NIFTY FMCG", value: "56780.90", change: "+120.15", percent: "+0.21%", direction: "UP" },
+      { symbol: "NIFTY NEXT 50", value: "68450.25", change: "-180.60", percent: "-0.26%", direction: "DOWN" },
+      { symbol: "NIFTY MIDCAP 100", value: "54230.70", change: "+95.80", percent: "+0.18%", direction: "UP" },
+      { symbol: "NIFTY SMALLCAP 100", value: "17850.40", change: "-35.20", percent: "-0.20%", direction: "DOWN" }
+    ];
+
+    function render() {
+      const ticker = document.getElementById("ticker");
+      if (!ticker || !stocks || stocks.length === 0) return;
+
+      ticker.innerHTML = stocks.map(function(s) {
+        const isUp = s.direction === "UP";
+        const cls = isUp ? "up" : "down";
+        const arrow = isUp ? "▲" : "▼";
+        return '<span class="item">' +
+          '<span class="symbol">' + s.symbol + '</span>' +
+          '<span class="value">' + s.value + '</span>' +
+          '<span class="' + cls + '"><span class="arrow">' + arrow + '</span> ' + s.change + ' (' + s.percent + ')</span>' +
+        '</span>';
+      }).join("");
+
+      const calculatedDuration = Math.max(stocks.length * 8, config.speed);
+      const tickerTrack = document.getElementById("ticker-track");
+      if (tickerTrack) {
+        tickerTrack.style.animationDuration = calculatedDuration + "s";
+      }
+    }
 
     async function loadData() {
       try {
@@ -259,32 +302,13 @@
           render();
         }
       } catch (e) {
-        console.error("Fetch error:", e);
+        console.error("Fetch failed:", e);
       }
     }
 
-    function render() {
-      const ticker = document.getElementById("ticker");
-      ticker.innerHTML = stocks.map(s => {
-        const isUp = s.direction === "UP";
-        const cls = isUp ? "up" : "down";
-        const arrow = isUp ? "▲" : "▼";
-        return `<span class="item">
-          <span class="symbol">${s.symbol}</span>
-          <span class="value">${s.value}</span>
-          <span class="change-group ${cls}">
-            <span class="arrow">${arrow}</span>
-            <span>${s.change} (${s.percent})</span>
-          </span>
-        </span>`;
-      }).join("");
-
-      const calculatedDuration = Math.max(stocks.length * 10, config.speed);
-      const tickerTrack = document.getElementById("ticker-track");
-      tickerTrack.style.animationDuration = calculatedDuration + "s";
-    }
-
+    // Initialize immediately
     applyConfig();
+    render();
     loadData();
     setInterval(loadData, 60000);
   </script>
