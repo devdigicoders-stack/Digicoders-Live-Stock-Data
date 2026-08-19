@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      display: flex;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: Arial Black, sans-serif;
+    }
+    .ticker-wrap {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .ticker-text {
+      display: inline-block;
+      animation: scroll linear infinite;
+      font-size: 5vw;
+      font-weight: 900;
+    }
+    .item { display: inline-block; margin-right: 6vw; }
+    .symbol  { color: #FFD700; }
+    .value   { color: #FFFFFF; margin: 0 1vw; }
+    .up      { color: #00FF00; }
+    .down    { color: #FF3333; }
+    @keyframes scroll {
+      0%   { transform: translateX(100vw); }
+      100% { transform: translateX(-100%); }
+    }
+  </style>
+</head>
+<body>
+  <div class="ticker-wrap">
+    <div class="ticker-text" id="ticker">Loading...</div>
+  </div>
+
+  <script>
+    let stocks = [];
+
+    async function loadData() {
+      try {
+        const res  = await fetch("/api/ticker");
+        const json = await res.json();
+        if (json.status && json.data.length > 0) {
+          stocks = json.data;
+          render();
+        }
+      } catch (e) {}
+    }
+
+    function render() {
+      const ticker = document.getElementById("ticker");
+      ticker.innerHTML = stocks.map(s => {
+        const cls = s.direction === "UP" ? "up" : "down";
+        const arrow = s.direction === "UP" ? "▲" : "▼";
+        return `<span class="item">
+          <span class="symbol">${s.symbol}</span>
+          <span class="value">${s.value}</span>
+          <span class="${cls}">${arrow} ${s.change} (${s.percent})</span>
+        </span>`;
+      }).join("");
+
+      // Set scroll speed based on content width
+      const duration = Math.max(stocks.length * 5, 20);
+      ticker.style.animationDuration = duration + "s";
+    }
+
+    loadData();
+    setInterval(loadData, 60000);
+  </script>
+</body>
+</html>
