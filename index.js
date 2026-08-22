@@ -22,58 +22,50 @@ let kiteConfig = {
   source: "INITIALIZING"
 };
 
-// Target Instruments defined from all 6 images
+// Target Instruments
 const INSTRUMENTS = [
   // 1. Key Indices
-  { id: "NIFTY", symbol: "NIFTY 50", kiteSymbol: "NSE:NIFTY 50", tvSymbol: "NSE:NIFTY", category: "Key indices", fallback: { value: "24214.05", change: "+135.75", percent: "+0.56%", direction: "UP" } },
-  { id: "SENSEX", symbol: "SENSEX", kiteSymbol: "BSE:SENSEX", tvSymbol: "BSE:SENSEX", category: "Key indices", fallback: { value: "77443.73", change: "+534.05", percent: "+0.69%", direction: "UP" } },
-  { id: "BANKNIFTY", symbol: "BANKNIFTY", kiteSymbol: "NSE:NIFTY BANK", tvSymbol: "NSE:BANKNIFTY", category: "Key indices", fallback: { value: "57612.45", change: "+372.70", percent: "+0.65%", direction: "UP" } },
-  { id: "INDIAVIX", symbol: "INDIAVIX", kiteSymbol: "NSE:INDIA VIX", tvSymbol: "NSE:INDIAVIX", category: "Key indices", fallback: { value: "10.67", change: "-0.65", percent: "-5.74%", direction: "DOWN" } },
-  { id: "FINNIFTY", symbol: "FINNIFTY", kiteSymbol: "NSE:NIFTY FIN SERVICE", tvSymbol: "NSE:CNXFINANCE", category: "Key indices", fallback: { value: "26241.40", change: "+228.40", percent: "+0.88%", direction: "UP" } },
-  { id: "MIDCPNIFTY", symbol: "MIDCPNIFTY", kiteSymbol: "NSE:NIFTY MID SELECT", tvSymbol: "NSE:NIFTY_MID_SELECT", category: "Key indices", fallback: { value: "14954.35", change: "+86.45", percent: "+0.57%", direction: "UP" } },
-  { id: "NIFTY500", symbol: "NIFTY 500", kiteSymbol: "NSE:NIFTY 500", tvSymbol: "NSE:CNX500", category: "Key indices", fallback: { value: "23531.60", change: "+145.40", percent: "+0.62%", direction: "UP" } },
-  { id: "NIFTY_SMALLCAP", symbol: "NIFTY SMALL CAP", kiteSymbol: "NSE:NIFTY SMALLCAP 100", tvSymbol: "NSE:CNXSMALLCAP", category: "Key indices", fallback: { value: "18391.55", change: "+111.35", percent: "+1.12%", direction: "UP" } },
-  { id: "NFTALPHA50", symbol: "NFTALPHA50", kiteSymbol: "NSE:NIFTY ALPHA 50", tvSymbol: "NSE:CNXALPHA50", category: "Key indices", fallback: { value: "56244.60", change: "+467.65", percent: "+0.84%", direction: "UP" } },
-  { id: "NIFTY_MICROCAP250", symbol: "NIFTY MICROCAP250", kiteSymbol: "NSE:NIFTY MICROCAP250", tvSymbol: "NSE:NIFTYMICROCAP250", category: "Key indices", fallback: { value: "26322.50", change: "+190.65", percent: "+0.73%", direction: "UP" } },
-  { id: "SMALLCAP50", symbol: "SMALLCAP50", kiteSymbol: "NSE:NIFTY SMLCAP 50", tvSymbol: "NSE:CNXSMALLCAP", category: "Key indices", fallback: { value: "9956.95", change: "+111.35", percent: "+1.12%", direction: "UP" } },
-  { id: "BSE_BANKEX", symbol: "BSE BANKEX", kiteSymbol: "BSE:BANKEX", tvSymbol: "BSE:BANKEX", category: "Key indices", fallback: { value: "65272.32", change: "+478.86", percent: "+0.74%", direction: "UP" } },
+  { id: "NIFTY", symbol: "NIFTY 50", kiteSymbol: "NSE:NIFTY 50", tvSymbol: "NSE:NIFTY", category: "Key indices" },
+  { id: "SENSEX", symbol: "SENSEX", kiteSymbol: "BSE:SENSEX", tvSymbol: "BSE:SENSEX", category: "Key indices" },
+  { id: "BANKNIFTY", symbol: "BANKNIFTY", kiteSymbol: "NSE:NIFTY BANK", tvSymbol: "NSE:BANKNIFTY", category: "Key indices" },
+  { id: "INDIAVIX", symbol: "INDIAVIX", kiteSymbol: "NSE:INDIA VIX", tvSymbol: "NSE:INDIAVIX", category: "Key indices" },
+  { id: "FINNIFTY", symbol: "FINNIFTY", kiteSymbol: "NSE:NIFTY FIN SERVICE", tvSymbol: "NSE:CNXFINANCE", category: "Key indices" },
+  { id: "MIDCPNIFTY", symbol: "MIDCPNIFTY", kiteSymbol: "NSE:NIFTY MID SELECT", tvSymbol: "NSE:NIFTY_MID_SELECT", category: "Key indices" },
+  { id: "NIFTY500", symbol: "NIFTY 500", kiteSymbol: "NSE:NIFTY 500", tvSymbol: "NSE:CNX500", category: "Key indices" },
+  { id: "NIFTY_SMALLCAP", symbol: "NIFTY SMALL CAP", kiteSymbol: "NSE:NIFTY SMALLCAP 100", tvSymbol: "NSE:CNXSMALLCAP", category: "Key indices" },
+  { id: "NFTALPHA50", symbol: "NFTALPHA50", kiteSymbol: "NSE:NIFTY ALPHA 50", tvSymbol: "NSE:CNXALPHA50", category: "Key indices" },
+  { id: "NIFTY_MICROCAP250", symbol: "NIFTY MICROCAP250", kiteSymbol: "NSE:NIFTY MICROCAP250", tvSymbol: "NSE:NIFTYMICROCAP250", category: "Key indices" },
+  { id: "SMALLCAP50", symbol: "SMALLCAP50", kiteSymbol: "NSE:NIFTY SMLCAP 50", tvSymbol: "NSE:CNXSMALLCAP", category: "Key indices" },
+  { id: "BSE_BANKEX", symbol: "BSE BANKEX", kiteSymbol: "BSE:BANKEX", tvSymbol: "BSE:BANKEX", category: "Key indices" },
 
   // 2. Sector-Based Indices
-  { id: "NIFTY_PHARMA", symbol: "NIFTY PHARMA", kiteSymbol: "NSE:NIFTY PHARMA", tvSymbol: "NSE:CNXPHARMA", category: "Sector-based indices", fallback: { value: "26403.70", change: "+89.90", percent: "+0.34%", direction: "UP" } },
-  { id: "NIFTY_FMCG", symbol: "NIFTY FMCG", kiteSymbol: "NSE:NIFTY FMCG", tvSymbol: "NSE:CNXFMCG", category: "Sector-based indices", fallback: { value: "47625.35", change: "+151.45", percent: "+0.32%", direction: "UP" } },
-  { id: "NIFTY_METAL", symbol: "NIFTY METAL", kiteSymbol: "NSE:NIFTY METAL", tvSymbol: "NSE:CNXMETAL", category: "Sector-based indices", fallback: { value: "13084.65", change: "+61.40", percent: "+0.47%", direction: "UP" } },
-  { id: "NIFTY_PSU_BANK", symbol: "NIFTY PSU BANK", kiteSymbol: "NSE:NIFTY PSU BANK", tvSymbol: "NSE:CNXPSUBANK", category: "Sector-based indices", fallback: { value: "8657.50", change: "+39.85", percent: "+0.46%", direction: "UP" } },
-  { id: "NIFTY_PVT_BANK", symbol: "NIFTY PVT BANK", kiteSymbol: "NSE:NIFTY PVT BANK", tvSymbol: "NSE:NIFTYPVTBANK", category: "Sector-based indices", fallback: { value: "27470.90", change: "+263.20", percent: "+0.97%", direction: "UP" } },
-  { id: "NIFTY_REALTY", symbol: "NIFTY REALTY", kiteSymbol: "NSE:NIFTY REALTY", tvSymbol: "NSE:CNXREALTY", category: "Sector-based indices", fallback: { value: "906.05", change: "+10.70", percent: "+1.20%", direction: "UP" } },
-  { id: "NIFTY_OIL_GAS", symbol: "NIFTY OIL & GAS", kiteSymbol: "NSE:NIFTY OIL AND GAS", tvSymbol: "NSE:CNXOILGAS", category: "Sector-based indices", fallback: { value: "11194.25", change: "+17.35", percent: "+0.16%", direction: "UP" } },
-  { id: "NIFTY_MEDIA", symbol: "NIFTY MEDIA", kiteSymbol: "NSE:NIFTY MEDIA", tvSymbol: "NSE:CNXMEDIA", category: "Sector-based indices", fallback: { value: "1614.05", change: "+26.10", percent: "+1.64%", direction: "UP" } },
-  { id: "NIFTY_ENERGY", symbol: "NIFTY ENERGY", kiteSymbol: "NSE:NIFTY ENERGY", tvSymbol: "NSE:CNXENERGY", category: "Sector-based indices", fallback: { value: "38204.35", change: "+79.90", percent: "+0.21%", direction: "UP" } },
-  { id: "NIFTY_MNC", symbol: "NIFTY MNC", kiteSymbol: "NSE:NIFTY MNC", tvSymbol: "NSE:CNXMNC", category: "Sector-based indices", fallback: { value: "33223.60", change: "+150.70", percent: "+0.46%", direction: "UP" } },
-  { id: "NIFTY_FINSERV", symbol: "NIFTY FINSERV", kiteSymbol: "NSE:NIFTY FIN SERVICE", tvSymbol: "NSE:CNXFINANCE", category: "Sector-based indices", fallback: { value: "28537.40", change: "+216.90", percent: "+0.77%", direction: "UP" } },
-  { id: "NIFTY_INFRA", symbol: "NIFTY INFRA", kiteSymbol: "NSE:NIFTY INFRA", tvSymbol: "NSE:CNXINFRA", category: "Sector-based indices", fallback: { value: "9347.20", change: "+41.65", percent: "+0.45%", direction: "UP" } },
-  { id: "NIFTY_IT", symbol: "NIFTY IT", kiteSymbol: "NSE:NIFTY IT", tvSymbol: "NSE:CNXIT", category: "Sector-based indices", fallback: { value: "30657.10", change: "+224.05", percent: "+0.74%", direction: "UP" } },
-  { id: "NIFTY_AUTO", symbol: "NIFTY AUTO", kiteSymbol: "NSE:NIFTY AUTO", tvSymbol: "NSE:CNXAUTO", category: "Sector-based indices", fallback: { value: "29336.00", change: "+150.60", percent: "+0.52%", direction: "UP" } },
+  { id: "NIFTY_PHARMA", symbol: "NIFTY PHARMA", kiteSymbol: "NSE:NIFTY PHARMA", tvSymbol: "NSE:CNXPHARMA", category: "Sector-based indices" },
+  { id: "NIFTY_FMCG", symbol: "NIFTY FMCG", kiteSymbol: "NSE:NIFTY FMCG", tvSymbol: "NSE:CNXFMCG", category: "Sector-based indices" },
+  { id: "NIFTY_METAL", symbol: "NIFTY METAL", kiteSymbol: "NSE:NIFTY METAL", tvSymbol: "NSE:CNXMETAL", category: "Sector-based indices" },
+  { id: "NIFTY_PSU_BANK", symbol: "NIFTY PSU BANK", kiteSymbol: "NSE:NIFTY PSU BANK", tvSymbol: "NSE:CNXPSUBANK", category: "Sector-based indices" },
+  { id: "NIFTY_PVT_BANK", symbol: "NIFTY PVT BANK", kiteSymbol: "NSE:NIFTY PVT BANK", tvSymbol: "NSE:NIFTYPVTBANK", category: "Sector-based indices" },
+  { id: "NIFTY_REALTY", symbol: "NIFTY REALTY", kiteSymbol: "NSE:NIFTY REALTY", tvSymbol: "NSE:CNXREALTY", category: "Sector-based indices" },
+  { id: "NIFTY_OIL_GAS", symbol: "NIFTY OIL & GAS", kiteSymbol: "NSE:NIFTY OIL AND GAS", tvSymbol: "NSE:CNXOILGAS", category: "Sector-based indices" },
+  { id: "NIFTY_MEDIA", symbol: "NIFTY MEDIA", kiteSymbol: "NSE:NIFTY MEDIA", tvSymbol: "NSE:CNXMEDIA", category: "Sector-based indices" },
+  { id: "NIFTY_ENERGY", symbol: "NIFTY ENERGY", kiteSymbol: "NSE:NIFTY ENERGY", tvSymbol: "NSE:CNXENERGY", category: "Sector-based indices" },
+  { id: "NIFTY_MNC", symbol: "NIFTY MNC", kiteSymbol: "NSE:NIFTY MNC", tvSymbol: "NSE:CNXMNC", category: "Sector-based indices" },
+  { id: "NIFTY_FINSERV", symbol: "NIFTY FINSERV", kiteSymbol: "NSE:NIFTY FIN SERVICE", tvSymbol: "NSE:CNXFINANCE", category: "Sector-based indices" },
+  { id: "NIFTY_INFRA", symbol: "NIFTY INFRA", kiteSymbol: "NSE:NIFTY INFRA", tvSymbol: "NSE:CNXINFRA", category: "Sector-based indices" },
+  { id: "NIFTY_IT", symbol: "NIFTY IT", kiteSymbol: "NSE:NIFTY IT", tvSymbol: "NSE:CNXIT", category: "Sector-based indices" },
+  { id: "NIFTY_AUTO", symbol: "NIFTY AUTO", kiteSymbol: "NSE:NIFTY AUTO", tvSymbol: "NSE:CNXAUTO", category: "Sector-based indices" },
 
   // 3. Bullion ETFs & Equities
-  { id: "GOLDCASE", symbol: "GOLDCASE", kiteSymbol: "NSE:GOLDCASE", tvSymbol: "NSE:GOLDCASE", category: "Bullion ETF", fallback: { value: "24.55", change: "+0.62", percent: "+2.59%", direction: "UP" } },
-  { id: "TATSILV", symbol: "TATSILV", kiteSymbol: "NSE:TATSILV", tvSymbol: "NSE:TATSILV", category: "Bullion ETF", fallback: { value: "22.99", change: "+1.03", percent: "+4.69%", direction: "UP" } },
-  { id: "GOLDBEES", symbol: "GOLDBEES", kiteSymbol: "NSE:GOLDBEES", tvSymbol: "NSE:GOLDBEES", category: "Bullion ETF", fallback: { value: "128.87", change: "+3.14", percent: "+2.50%", direction: "UP" } },
-  { id: "SILVERBEES", symbol: "SILVERBEES", kiteSymbol: "NSE:SILVERBEES", tvSymbol: "NSE:SILVERBEES", category: "Bullion ETF", fallback: { value: "226.09", change: "+9.66", percent: "+4.46%", direction: "UP" } },
-  { id: "NIFTYBEES", symbol: "NIFTYBEES", kiteSymbol: "NSE:NIFTYBEES", tvSymbol: "NSE:NIFTYBEES", category: "Bullion ETF", fallback: { value: "276.42", change: "+1.80", percent: "+0.66%", direction: "UP" } }
+  { id: "GOLDCASE", symbol: "GOLDCASE", kiteSymbol: "NSE:GOLDCASE", tvSymbol: "NSE:GOLDCASE", category: "Bullion ETF" },
+  { id: "TATSILV", symbol: "TATSILV", kiteSymbol: "NSE:TATSILV", tvSymbol: "NSE:TATSILV", category: "Bullion ETF" },
+  { id: "GOLDBEES", symbol: "GOLDBEES", kiteSymbol: "NSE:GOLDBEES", tvSymbol: "NSE:GOLDBEES", category: "Bullion ETF" },
+  { id: "SILVERBEES", symbol: "SILVERBEES", kiteSymbol: "NSE:SILVERBEES", tvSymbol: "NSE:SILVERBEES", category: "Bullion ETF" },
+  { id: "NIFTYBEES", symbol: "NIFTYBEES", kiteSymbol: "NSE:NIFTYBEES", tvSymbol: "NSE:NIFTYBEES", category: "Bullion ETF" }
 ];
 
-// Initialize in-memory cache with fallback data
+// Initialize empty cache — data will be populated from live sources only
 let cache = {
-  data: INSTRUMENTS.map(item => ({
-    id: item.id,
-    symbol: item.symbol,
-    category: item.category,
-    value: item.fallback.value,
-    change: item.fallback.change,
-    percent: item.fallback.percent,
-    direction: item.fallback.direction
-  })),
-  source: "Default Baseline",
+  data: [],
+  source: "Initializing",
   updatedAt: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
 };
 
@@ -118,14 +110,6 @@ async function fetchZerodhaQuotes() {
           change: changeStr,
           percent: pctStr,
           direction: changeVal >= 0 ? "UP" : "DOWN"
-        });
-      } else {
-        const existing = cache.data.find(d => d.id === inst.id) || inst.fallback;
-        result.push({
-          id: inst.id,
-          symbol: inst.symbol,
-          category: inst.category,
-          ...existing
         });
       }
     }
@@ -173,17 +157,6 @@ async function fetchTradingViewQuotes() {
           percent: isUp ? `+${changePct}%` : `${changePct}%`,
           direction: isUp ? "UP" : "DOWN"
         });
-      } else {
-        const existing = cache.data.find(d => d.id === inst.id) || inst.fallback;
-        result.push({
-          id: inst.id,
-          symbol: inst.symbol,
-          category: inst.category,
-          value: existing.value,
-          change: existing.change,
-          percent: existing.percent,
-          direction: existing.direction
-        });
       }
     }
     return result;
@@ -227,9 +200,8 @@ async function refreshCache() {
     }
   }
 
-  if (!updated && cache.data.length === 0) {
-    cache.source = "Default Baseline";
-    cache.updatedAt = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+  if (!updated) {
+    console.warn("All data sources failed. Cache not updated.");
   }
 }
 
