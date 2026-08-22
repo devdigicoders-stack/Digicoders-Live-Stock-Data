@@ -67,7 +67,6 @@
       display: inline-flex;
       align-items: center;
       white-space: nowrap;
-      animation: scroll linear infinite;
       will-change: transform;
       position: relative;
       top: var(--y-offset, 2px);
@@ -77,9 +76,15 @@
       display: inline-flex;
       align-items: center;
       font-family: Arial Black, "Arial Black", Impact, sans-serif;
-      font-size: 10px; /* Fixed to 10px */
+      font-size: 10px;
       font-weight: 900;
       line-height: 1;
+      padding-right: var(--gap, 20px);
+    }
+
+    @keyframes seamless-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
     }
 
     .item {
@@ -138,16 +143,14 @@
       display: none;
     }
 
-    @keyframes scroll {
-      0%   { transform: translateX(100vw); }
-      100% { transform: translateX(-100%); }
-    }
+
   </style>
 </head>
 <body>
   <div class="ticker-viewport" id="viewport">
     <div class="ticker-track" id="ticker-track">
       <div class="ticker-text" id="ticker"></div>
+      <div class="ticker-text" id="ticker-clone"></div>
     </div>
   </div>
 
@@ -196,11 +199,6 @@
         } else {
           viewport.classList.remove("guide-mode");
         }
-      }
-
-      const tickerTrack = document.getElementById("ticker-track");
-      if (tickerTrack) {
-        tickerTrack.style.animationDuration = config.speed + "s";
       }
 
       try {
@@ -290,9 +288,10 @@
 
     function render() {
       const ticker = document.getElementById("ticker");
+      const clone = document.getElementById("ticker-clone");
       if (!ticker || !stocks || stocks.length === 0) return;
 
-      ticker.innerHTML = stocks.map(function(s) {
+      const html = stocks.map(function(s) {
         const isUp = s.direction === "UP";
         const cls = isUp ? "up" : "down";
         const arrow = isUp ? "▲" : "▼";
@@ -303,11 +302,15 @@
         '</span>';
       }).join("");
 
-      const calculatedDuration = Math.max(stocks.length * 4.5, config.speed);
+      ticker.innerHTML = html;
+      clone.innerHTML = html;
+
+      // Duration based on content width for seamless loop
       const tickerTrack = document.getElementById("ticker-track");
-      if (tickerTrack) {
-        tickerTrack.style.animationDuration = calculatedDuration + "s";
-      }
+      const pxPerSec = 80;
+      const contentWidth = ticker.scrollWidth;
+      const duration = Math.max(contentWidth / pxPerSec, 10);
+      tickerTrack.style.animation = `seamless-scroll ${duration}s linear infinite`;
     }
 
     async function loadData() {
