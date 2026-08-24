@@ -307,7 +307,7 @@
 
       // Duration based on content width for seamless loop
       const tickerTrack = document.getElementById("ticker-track");
-      const pxPerSec = 80;
+      const pxPerSec = 60;
       const contentWidth = ticker.scrollWidth;
       const duration = Math.max(contentWidth / pxPerSec, 10);
       tickerTrack.style.animation = `seamless-scroll ${duration}s linear infinite`;
