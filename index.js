@@ -9,10 +9,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   next();
 });
 
-app.use(express.static(__dirname + "/public"));
+app.use(express.static(__dirname + "/public", {
+  etag: false,
+  maxAge: 0,
+  setHeaders: (res) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+  }
+}));
 
 // Zerodha Kite Credentials
 let kiteConfig = {

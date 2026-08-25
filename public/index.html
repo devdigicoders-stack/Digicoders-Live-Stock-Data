@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>DigiCoders Live Stock Data</title>
+  <!-- Google Font Arimo (metrically 1:1 identical to Arial) ensures Arial Bold works 100% across all devices & OS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --font-size: 10px;
@@ -15,6 +22,8 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: Arial, "Arial Bold", "Arimo", "Helvetica Neue", Helvetica, sans-serif;
+      font-weight: 700;
     }
 
     html, body {
@@ -26,7 +35,8 @@
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: Arial, "Arial Bold", "Arimo", "Helvetica Neue", Helvetica, sans-serif;
+      font-weight: 700;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
@@ -76,9 +86,9 @@
     .ticker-text {
       display: inline-flex;
       align-items: center;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 10px;
-      font-weight: bold;
+      font-family: Arial, "Arial Bold", "Arimo", "Helvetica Neue", Helvetica, sans-serif;
+      font-size: var(--font-size, 10px);
+      font-weight: 700;
       line-height: 1;
       padding-right: var(--gap, 20px);
     }
@@ -94,32 +104,38 @@
       margin-right: var(--gap, 20px);
       line-height: 1;
       white-space: nowrap;
+      font-family: inherit;
+      font-weight: 700;
     }
 
     .symbol {
       color: #FFD700;
       margin-right: 4px;
-      font-weight: bold;
+      font-family: inherit;
+      font-weight: 700;
     }
 
     .value {
       color: #FFFFFF;
       margin-right: 4px;
-      font-weight: bold;
+      font-family: inherit;
+      font-weight: 700;
     }
 
     .up {
       color: #00FF00;
       display: inline-flex;
       align-items: center;
-      font-weight: bold;
+      font-family: inherit;
+      font-weight: 700;
     }
 
     .down {
       color: #FF3333;
       display: inline-flex;
       align-items: center;
-      font-weight: bold;
+      font-family: inherit;
+      font-weight: 700;
     }
 
     .arrow {
@@ -143,8 +159,6 @@
       z-index: 999;
       display: none;
     }
-
-
   </style>
 </head>
 <body>
@@ -160,7 +174,7 @@
   <script>
     function getStoredConfig() {
       try {
-        const raw = localStorage.getItem("ticker_config_v5");
+        const raw = localStorage.getItem("ticker_config_v6");
         return raw ? JSON.parse(raw) : {};
       } catch (e) {
         return {};
@@ -184,7 +198,7 @@
       yOffset: getNum(urlParams.get("y"), saved.yOffset, 2), // Default +2px down for 10px font
       fontSize: 10, // Fixed 10px
       gap: getNum(urlParams.get("gap"), saved.gap, 20),
-      speed: getNum(urlParams.get("speed"), saved.speed, 40), // 40 px/sec
+      speed: getNum(urlParams.get("speed"), saved.speed, 20), // Slower default speed (20 px/sec)
       guide: urlParams.get("guide") === "1"
     };
 
@@ -205,14 +219,14 @@
       const ticker = document.getElementById("ticker");
       const tickerTrack = document.getElementById("ticker-track");
       if (ticker && tickerTrack && ticker.scrollWidth > 0) {
-        const pxPerSec = config.speed || 40;
+        const pxPerSec = config.speed || 20;
         const contentWidth = ticker.scrollWidth;
         const duration = Math.max(contentWidth / pxPerSec, 10);
         tickerTrack.style.animation = `seamless-scroll ${duration}s linear infinite`;
       }
 
       try {
-        localStorage.setItem("ticker_config_v5", JSON.stringify(config));
+        localStorage.setItem("ticker_config_v6", JSON.stringify(config));
       } catch (e) {}
     }
 
@@ -220,7 +234,7 @@
     function showToast(msg) {
       const toast = document.getElementById("info-toast");
       if (!toast) return;
-      toast.textContent = msg || `Y: ${config.yOffset}px | Size: 10px | Speed: ${config.speed}px/s`;
+      toast.textContent = msg || `Y: ${config.yOffset}px | Size: 10px | Speed: ${config.speed}px/s (Arial Bold)`;
       toast.style.display = "block";
       clearTimeout(toastTimeout);
       toastTimeout = setTimeout(function() {
@@ -249,7 +263,7 @@
       } else if (e.key.toLowerCase() === "r") {
         config.yOffset = 2;
         config.gap = 20;
-        config.speed = 40;
+        config.speed = 20; // Reset to 20 px/sec
         changed = true;
       }
 
@@ -317,7 +331,7 @@
 
       // Duration based on content width for seamless loop
       const tickerTrack = document.getElementById("ticker-track");
-      const pxPerSec = config.speed || 40;
+      const pxPerSec = config.speed || 20;
       const contentWidth = ticker.scrollWidth;
       const duration = Math.max(contentWidth / pxPerSec, 10);
       tickerTrack.style.animation = `seamless-scroll ${duration}s linear infinite`;
