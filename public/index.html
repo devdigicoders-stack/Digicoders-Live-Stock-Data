@@ -174,7 +174,7 @@
   <script>
     function getStoredConfig() {
       try {
-        const raw = localStorage.getItem("ticker_config_v6");
+        const raw = localStorage.getItem("ticker_config_v7");
         return raw ? JSON.parse(raw) : {};
       } catch (e) {
         return {};
@@ -198,7 +198,7 @@
       yOffset: getNum(urlParams.get("y"), saved.yOffset, 2), // Default +2px down for 10px font
       fontSize: 10, // Fixed 10px
       gap: getNum(urlParams.get("gap"), saved.gap, 20),
-      speed: getNum(urlParams.get("speed"), saved.speed, 20), // Slower default speed (20 px/sec)
+      speed: getNum(urlParams.get("speed"), saved.speed, 30), // Default speed (30 px/sec)
       guide: urlParams.get("guide") === "1"
     };
 
@@ -219,14 +219,14 @@
       const ticker = document.getElementById("ticker");
       const tickerTrack = document.getElementById("ticker-track");
       if (ticker && tickerTrack && ticker.scrollWidth > 0) {
-        const pxPerSec = config.speed || 20;
+        const pxPerSec = config.speed || 30;
         const contentWidth = ticker.scrollWidth;
         const duration = Math.max(contentWidth / pxPerSec, 10);
         tickerTrack.style.animation = `seamless-scroll ${duration}s linear infinite`;
       }
 
       try {
-        localStorage.setItem("ticker_config_v6", JSON.stringify(config));
+        localStorage.setItem("ticker_config_v7", JSON.stringify(config));
       } catch (e) {}
     }
 
@@ -263,7 +263,7 @@
       } else if (e.key.toLowerCase() === "r") {
         config.yOffset = 2;
         config.gap = 20;
-        config.speed = 20; // Reset to 20 px/sec
+        config.speed = 30; // Reset to 30 px/sec
         changed = true;
       }
 
@@ -331,7 +331,7 @@
 
       // Duration based on content width for seamless loop
       const tickerTrack = document.getElementById("ticker-track");
-      const pxPerSec = config.speed || 20;
+      const pxPerSec = config.speed || 30;
       const contentWidth = ticker.scrollWidth;
       const duration = Math.max(contentWidth / pxPerSec, 10);
       tickerTrack.style.animation = `seamless-scroll ${duration}s linear infinite`;
