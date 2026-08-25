@@ -183,7 +183,7 @@
       yOffset: getNum(urlParams.get("y"), saved.yOffset, 2), // Default +2px down for 10px font
       fontSize: 10, // Fixed 10px
       gap: getNum(urlParams.get("gap"), saved.gap, 20),
-      speed: getNum(urlParams.get("speed"), saved.speed, 60),
+      speed: getNum(urlParams.get("speed"), saved.speed, 40), // 40 px/sec
       guide: urlParams.get("guide") === "1"
     };
 
@@ -201,6 +201,15 @@
         }
       }
 
+      const ticker = document.getElementById("ticker");
+      const tickerTrack = document.getElementById("ticker-track");
+      if (ticker && tickerTrack && ticker.scrollWidth > 0) {
+        const pxPerSec = config.speed || 40;
+        const contentWidth = ticker.scrollWidth;
+        const duration = Math.max(contentWidth / pxPerSec, 10);
+        tickerTrack.style.animation = `seamless-scroll ${duration}s linear infinite`;
+      }
+
       try {
         localStorage.setItem("ticker_config_v5", JSON.stringify(config));
       } catch (e) {}
@@ -210,7 +219,7 @@
     function showToast(msg) {
       const toast = document.getElementById("info-toast");
       if (!toast) return;
-      toast.textContent = msg || `Y: ${config.yOffset}px | Size: 10px | Speed: ${config.speed}s`;
+      toast.textContent = msg || `Y: ${config.yOffset}px | Size: 10px | Speed: ${config.speed}px/s`;
       toast.style.display = "block";
       clearTimeout(toastTimeout);
       toastTimeout = setTimeout(function() {
@@ -228,10 +237,10 @@
         config.yOffset += 1; // Move text DOWN
         changed = true;
       } else if (e.key === "]" || e.key === "}") {
-        config.speed += 5; // Slower scroll
+        config.speed += 5; // Faster scroll
         changed = true;
       } else if (e.key === "[" || e.key === "{") {
-        config.speed = Math.max(5, config.speed - 5); // Faster scroll
+        config.speed = Math.max(5, config.speed - 5); // Slower scroll
         changed = true;
       } else if (e.key.toLowerCase() === "g") {
         config.guide = !config.guide; // Toggle guide
@@ -239,7 +248,7 @@
       } else if (e.key.toLowerCase() === "r") {
         config.yOffset = 2;
         config.gap = 20;
-        config.speed = 60;
+        config.speed = 40;
         changed = true;
       }
 
@@ -307,7 +316,7 @@
 
       // Duration based on content width for seamless loop
       const tickerTrack = document.getElementById("ticker-track");
-      const pxPerSec = 50;
+      const pxPerSec = config.speed || 40;
       const contentWidth = ticker.scrollWidth;
       const duration = Math.max(contentWidth / pxPerSec, 10);
       tickerTrack.style.animation = `seamless-scroll ${duration}s linear infinite`;
