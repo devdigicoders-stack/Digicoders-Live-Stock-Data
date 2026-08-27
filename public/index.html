@@ -348,12 +348,10 @@
             return;
           }
         }
-      } catch (e) {
-        // Backend not available (e.g. static GitHub pages hosting)
-      }
-
-      // Direct fallback removed — backend handles all data sources
-      console.warn("Backend unavailable, no data to display.");
+      } catch (e) {}
+      // Backend unavailable or no data yet
+      console.warn("No data yet, will retry...");
+    }
     }
 
     // Initialize immediately

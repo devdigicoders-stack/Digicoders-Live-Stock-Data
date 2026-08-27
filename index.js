@@ -129,13 +129,26 @@ async function fetchZerodhaQuotes() {
 
 // Fetch from NSE India API
 async function fetchNSEQuotes() {
+  // Step 1: Get cookies first
+  const cookieRes = await axios.get("https://www.nseindia.com", {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.5",
+    },
+    timeout: 10000
+  });
+  const cookies = (cookieRes.headers["set-cookie"] || []).map(c => c.split(";")[0]).join("; ");
+
+  // Step 2: Fetch indices with cookies
   const res = await axios.get("https://www.nseindia.com/api/allIndices", {
     headers: {
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       "Accept": "application/json",
-      "Referer": "https://www.nseindia.com/"
+      "Referer": "https://www.nseindia.com/",
+      "Cookie": cookies
     },
-    timeout: 8000
+    timeout: 10000
   });
 
   if (res.data && Array.isArray(res.data.data)) {
