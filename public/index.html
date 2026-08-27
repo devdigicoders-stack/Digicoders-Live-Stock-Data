@@ -352,47 +352,8 @@
         // Backend not available (e.g. static GitHub pages hosting)
       }
 
-      // Direct fallback to live TradingView scanner if backend is unavailable
-      try {
-        const tickers = INSTRUMENTS.map(function(s) { return s.tvSymbol; });
-        const directRes = await fetch("https://scanner.tradingview.com/india/scan", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            symbols: { tickers: tickers },
-            columns: ["name", "close", "change", "change_abs"]
-          })
-        });
-        if (directRes.ok) {
-          const directJson = await directRes.json();
-          if (directJson && Array.isArray(directJson.data)) {
-            const map = {};
-            directJson.data.forEach(function(item) {
-              map[item.s] = { price: item.d[1], pct: item.d[2], abs: item.d[3] };
-            });
-            stocks = INSTRUMENTS.map(function(s) {
-              const live = map[s.tvSymbol];
-              if (live && live.price !== undefined && live.price !== null) {
-                const val = parseFloat(live.price).toFixed(2);
-                const chgAbs = parseFloat(live.abs || 0).toFixed(2);
-                const chgPct = parseFloat(live.pct || 0).toFixed(2);
-                const isUp = parseFloat(chgAbs) >= 0;
-                return {
-                  ...s,
-                  value: val,
-                  change: isUp ? "+" + chgAbs : chgAbs,
-                  percent: isUp ? "+" + chgPct + "%" : chgPct + "%",
-                  direction: isUp ? "UP" : "DOWN"
-                };
-              }
-              return s;
-            });
-            render();
-          }
-        }
-      } catch(err) {
-        console.error("Direct fetch error:", err);
-      }
+      // Direct fallback removed — backend handles all data sources
+      console.warn("Backend unavailable, no data to display.");
     }
 
     // Initialize immediately
